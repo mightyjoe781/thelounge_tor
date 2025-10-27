@@ -1,0 +1,35 @@
+
+services:
+  tor-proxy:
+    image: peterdavehello/tor-socks-proxy:latest
+    container_name: tor-proxy
+    restart: unless-stopped
+    volumes:
+      - ./torrc:/etc/tor/torrc
+    expose:
+      - "9150"
+      - "8853/udp"
+    networks:
+      - irc
+
+  thelounge:
+    image: lscr.io/linuxserver/thelounge:latest
+    container_name: thelounge
+    restart: unless-stopped
+    depends_on:
+      - tor-proxy
+    environment:
+      - PUID=1001
+      - PGID=1001
+      - TZ=Asia/Kolkata
+      - THELOUNGE_HOME=/config
+    volumes:
+      - ./config:/config
+    ports:
+      - "127.0.0.1:12005:9000"
+    networks:
+      - irc
+
+networks:
+  irc:
+    name: irc
